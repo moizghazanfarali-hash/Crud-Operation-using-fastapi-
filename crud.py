@@ -139,3 +139,4 @@ def create_analyst(user_id: str, analyst: Analyst):
 
 
     return record
+
