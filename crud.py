@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel,EmailStr
 import json
 import os
 import uuid
@@ -10,9 +10,7 @@ FileName = "database.json"
 
 class User(BaseModel):
     name: str
-    age: int
-    city: str
-    diabetes: bool
+    email: EmailStr
 
 
 def load_data():
@@ -40,16 +38,19 @@ def create_user(user: User):
     record = {
         "user_id": user_id,
         "name": user.name,
-        "age": user.age,
-        "city": user.city,
-        "diabetes": user.diabetes
+        "email":user.email
+        
+
     }
 
     data.append(record)
     save_data(data)
 
     return {"message": "User created successfully", "user": record}
-
+    
+@app.get("/all_users)
+def all_data():
+    return load_data()
 
 @app.get("/users/{user_id}")
 def get_user(user_id: str):
@@ -69,15 +70,12 @@ def update_user(user_id: str, updated_user: User):
     for user in data:
         if user.get("user_id") == user_id:
             user["name"] = updated_user.name
-            user["age"] = updated_user.age
-            user["city"] = updated_user.city
-            user["diabetes"] = updated_user.diabetes
+            user["email"] = user_email.email
 
             save_data(data)
             return {"message": "User updated successfully", "user": user}
 
     raise HTTPException(status_code=404, detail="User not found")
-
 
 @app.delete("/users/{user_id}")
 def delete_user(user_id: str):
@@ -91,11 +89,9 @@ def delete_user(user_id: str):
 
     raise HTTPException(status_code=404, detail="User not found")
 
-
 class Analyst(BaseModel):
     your_personal_information: str
  
-
 @app.post("/analysts/{user_id}")
 def create_analyst(user_id: str, analyst: Analyst):
 
@@ -140,5 +136,6 @@ def create_analyst(user_id: str, analyst: Analyst):
 
     data.append(record)
     save_data(data)
+
 
     return record
